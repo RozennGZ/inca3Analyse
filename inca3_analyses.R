@@ -300,8 +300,9 @@ reco_table=bind_rows(reco_enftok,reco_aduok%>%
 
 #EXPORT
 write.xlsx(res_MAR_MER%>%left_join(data_de%>%select(NOIND,tot_QTE_SOLIDE,tot_NRJ_SOLIDE,DE)),
-           file="out/indic_nut.xlsx")
-
+           file="out/xlsx/indic_nut.xlsx")
+write.csv2(res_MAR_MER%>%left_join(data_de%>%select(NOIND,tot_QTE_SOLIDE,tot_NRJ_SOLIDE,DE)),
+           file="out/csv/indic_nut.csv")
 ########## Indicateurs alim ---------------------
 
 #PNNS-GS ------------------
@@ -495,5 +496,6 @@ app_nut_pnns=app_nut%>%
   select(NOIND:poidsOK,starts_with("score_"),nap,BMR,EER,ratio_EER,score_PNNS_adj)
 
 #EXPORT
-write.xlsx(app_nut_PNNS,
-           file="out/indic_alim_PNNS.xlsx")
+write.xlsx(app_nut_pnns,
+           file="out/xlsx/indic_alim_PNNS.xlsx")
+write.csv2(app_nut_pnns,"out/csv/indic_alim_PNNS.xlsx")
