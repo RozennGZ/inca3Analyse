@@ -173,13 +173,16 @@ app_nut%>%
   filter(tage_PS!=1)%>%
   mutate(proteines_kg=proteines/poidsOK)%>%
   #conserve le choix pour les recos en zinc
-  mutate(zinc300=zinc,zinc600=zinc,zinc900=zinc)%>%select(-zinc)%>%
+  mutate(zinc300=zinc,zinc600=zinc,zinc900=zinc)%>%
   #conserve les diff reco en fer
   mutate(ferlow=fer,ferhigh=fer)%>%select(-fer)%>%
   pivot_longer(cols=c(aet:ag_lau_myr_pal_pctNRJ,proteines_kg:ferhigh))%>%
   mutate(class=ifelse(is.na(pond_indiv_adu_pop3),"enft","adu"))%>%
   left_join(reco,by=c("name"="NUT_inca","tage_PS","sex_PS","class"))%>%
   filter(!(is.na(AS)&is.na(LSS)&is.na(BNM)&is.na(RNP)))%>%
+  #pr vitamine b1 et b3, on multiplie la reco par 100 car l'apport est exprimé vitamine_b1_pctNRJ et vitamine_b3_pctNRJ *100.
+  mutate(BNM=ifelse(name%in%c("vitamine_b1_pctNRJ","vitamine_b3_pctNRJ"),BNM*100,BNM),
+         RNP=ifelse(name%in%c("vitamine_b1_pctNRJ","vitamine_b3_pctNRJ"),RNP*100,RNP))%>%
   mutate(pct_AS=
            #warning pr les fibres, l'unité est g/kcal dc on récupère la variable en % de l'énergie et on divise par 4
            ifelse(class=="enft"&name=="fibres_pctNRJ",((value/4)/100)/AS*100,
@@ -189,8 +192,8 @@ app_nut%>%
          pct_LSS=value/LSS*100)
 
 #EXPORT
-openxlsx::write.xlsx(app_pct_reco,file="out/xlsx/app_pct_reco.xlsx")
-write.csv2(app_pct_reco,file="out/csv/app_pct_reco.csv")
+openxlsx::write.xlsx(app_pct_reco%>%rename(apport=value),file="out/xlsx/app_pct_reco.xlsx")
+write.csv2(app_pct_reco%>%rename(apport=value),file="out/csv/app_pct_reco.csv")
 
 ########## Indicateurs nut ---------------------
 
@@ -208,7 +211,7 @@ data_de<-conso_compo%>%
   dplyr::mutate(DE = (MOY_NRJ_J/MOY_QTE_J)*100)
 
 #20 individus ont une DE nulle car aucune conso d'aliments solides (laits infantiles)
-View(conso_compo%>%filter(NOIND%in%c(data_de%>%filter(is.na(DE))%>%pull(NOIND))))
+#View(conso_compo%>%filter(NOIND%in%c(data_de%>%filter(is.na(DE))%>%pull(NOIND))))
 
 #MAR----------
 #app_nut=read.csv2("out/csv/app_nut_indiv.csv")
