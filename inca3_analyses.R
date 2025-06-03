@@ -4,6 +4,7 @@ library(openxlsx)
 library(survey)
 options("survey.lonely.psu" = "adjust")
 source("fonctions/mar_mer.R")
+source("fonctions/NRF9.R")
 
 #Indicateurs nutritionnels et alimentaires pour les individus d'INCA3 de plus de 1 an
 
@@ -235,6 +236,23 @@ reco_table=bind_rows(reco_enftok,reco_aduok%>%
   )
 #note : calcium à 900mg pour tous les adultes)
 
+#NRF 9.3 -------------
+#app_nut=read.csv2("out/csv/app_nut_indiv.csv")
+
+NRF_INCA=nrf9_3d(df=
+app_nut%>%
+  filter(type=="app_hors_alcool")%>%
+  select(NOIND,proteines,fibres,vitamine_a,vitamine_c,vitamine_d,calcium,fer,potassium,magnesium,sucres_aj,ags,sodium,aet)%>%
+    rename(proteine=proteines,fibre=fibres,
+           vit_A=vitamine_a,vit_C=vitamine_c,vit_D=vitamine_d,iron=fer,add_sugar=sucres_aj,sfa=ags)
+)
+
+#moyennes tests chz adultes et enfants
+# View(NRF_INCA%>%left_join(description_indiv%>%select(NOIND,pond_indiv_adu_pop3,pond_indiv_enf_pop3))%>%
+#   mutate(ech=ifelse(is.na(pond_indiv_adu_pop3),"enf","ad"))%>%
+#   #group_by(ech)%>%
+#   summarise(across(ratio_p_prot:NRF9,~mean(.x))))
+
 #PanDiet -------------
 
 #CODE TYPHAINE
@@ -302,9 +320,11 @@ reco_table=bind_rows(reco_enftok,reco_aduok%>%
 # moy_pandiet <- mean(PANDIET$PANDiet)
 
 #EXPORT
-write.xlsx(res_MAR_MER%>%left_join(data_de%>%select(NOIND,tot_QTE_SOLIDE,tot_NRJ_SOLIDE,DE)),
-           file="out/xlsx/indic_nut.xlsx")
-write.csv2(res_MAR_MER%>%left_join(data_de%>%select(NOIND,tot_QTE_SOLIDE,tot_NRJ_SOLIDE,DE)),
+write.xlsx(res_MAR_MER%>%left_join(data_de%>%select(NOIND,tot_QTE_SOLIDE,tot_NRJ_SOLIDE,DE))%>%
+             left_join(NRF_INCA%>%select(NOIND,starts_with("ratio_"),NR,LIM,NRF9)),
+                      file="out/xlsx/indic_nut.xlsx")
+write.csv2(res_MAR_MER%>%left_join(data_de%>%select(NOIND,tot_QTE_SOLIDE,tot_NRJ_SOLIDE,DE))%>%
+             left_join(NRF_INCA%>%select(NOIND,starts_with("ratio_"),NR,LIM,NRF9)),
            file="out/csv/indic_nut.csv")
 ########## Indicateurs alim ---------------------
 
