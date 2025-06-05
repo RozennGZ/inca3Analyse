@@ -530,7 +530,7 @@ write.csv2(app_nut_pnns,"out/csv/indic_alim_PNNS.xlsx")
 #score from 0 to 110 (to 100 sans les transfat)
 #veg : serv/d 0 to 5 (score 10). All veg (hors pdt) - 1 serv = 0.5 cup veg or 1 cup of green leafy veg = 236.59 g
 # fruits (only whole fruits without fruit juice) : serv/d 0 to 4 - 1 serv = one medium piece of fruit or 0.5 cup berries 236.59 g 
-#whole grains : g/d 0 to 75 g for women or to 90 g for men
+#whole grains : g/d 0 to 75 g for women or to 90 g for men. cf raw whole grain. Dans 100g de pain, considérer 16 g de whole grains et dans cereales complètes 28.35 g
 #sugar sweetened bev and fruit juice serv/d >=1 to 0. 1 serv = 8 oz = 8*28.35 g
 # nut & legumes & veg prot (serv/d) : 0 to 1 : nuts and veg prot (e.g. tofu). 1 serv = 28.35 g
 # red meat+processed meat (serv/d): >=1.5 to red : boeuf, porc, agneau, charcuterie. 1 serv = 4 oz for unprocess (4 * 28.35) or 1.5 oz for processed (1.5 * 28.35g)
@@ -554,9 +554,9 @@ redmeat_serv=(sg_PNNS_viandeshorsvolaille+sg_PNNS_abats)/(4*28.35)+
 (sg_PNNS_jambon+sg_PNNS_nojambon)/(1.5*28.35),
 nut_serv=(sg_PNNS_legsecs+sg_PNNS_noixfruitsacoque+sg_PNNS_subvege)/28.35,
 bev_serv=(sg_PNNS_bsucrees+sg_PNNS_jusdefruits100_)/(8*28.35),
-fruit_serv=sg_PNNS_fruits/100, #GEMRCN
-veg_serv=sg_PNNS_legumes/150, #GEMRCN
-wgrains=(sg_PNNS_prodcerealcomplets+sg_PNNS_prodpancomplets)
+fruit_serv=sg_PNNS_fruits/118, #(0.5 cup cf publi)
+veg_serv=sg_PNNS_legumes/118, #(0.5 cup)
+wgrains=(sg_PNNS_prodcerealcomplets*(28.35/100)+sg_PNNS_prodpancomplets*(16/100))
 )%>%
   select(NOIND,sodium,sex_PS,pond_indiv_adu_pop3,pond_indiv_enf_pop3,epa_dha,pufa_nrj,redmeat_serv,nut_serv,bev_serv,fruit_serv,veg_serv,wgrains)%>%
   mutate(ech=ifelse(is.na(pond_indiv_enf_pop3),"adu","enf"),

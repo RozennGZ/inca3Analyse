@@ -2,9 +2,9 @@
 #' #SANS les transfat !
 #' 
 #' df table qui doit contenir : NOIND, sex_PS pour le sexe (1=homme, 2=femme), et les variables suivantes
-#'veg_serv : nb de portions/j de légumes, All veg (hors pdt) - ds la publi : 1 serv = 0.5 cup veg or 1 cup of green leafy veg = 236.59 g - 150 considéré pour INCA3 (GEMRCN)
-#' fruit_serv : nb de portions/j de fruits (only fruits without fruit juice) ds la publi : 1 serv = one medium piece of fruit or 0.5 cup berries 236.59 g  - 100 considéré pour INCA3 (GEMRCN)
-#' wgrains : g/d 0 de produits complets, normalement exprimé en grains complets bruts
+#'veg_serv : nb de portions/j de légumes, All veg (hors pdt) - ds la publi : 1 serv = 0.5 cup veg or 1 cup of green leafy veg = 236.59 g - 118 considéré pour INCA3
+#' fruit_serv : nb de portions/j de fruits (only fruits without fruit juice) ds la publi : 1 serv = one medium piece of fruit or 0.5 cup berries 236.59 g  - 118 considéré pour INCA3
+#' wgrains : g/d 0 de produits complets, normalement exprimé en grains complets bruts. Prendre 16g de whole grains pour 100g de produits panification complet et 28.35 pour des céréales completes (cf FPED https://www.ars.usda.gov/ARSUserFiles/80400530/pdf/fped/Amended%20FPED%202017-2018%20documentation%20for%20Use%20with%20WWEIA%20NHANES%202017-March%202020%20Prepandemic.pdf)
 #' bev_serv : nb de portions de boissons sucrées et jus de fruits par jour, 1 serv = 8 oz = 8*28.35 g
 #' nut_serv : nombre de portions de nuts + légumineuses + substituts protéiques type tofu. 1 serv = 28.35 g
 #' redmeat_serv : nb de portions de viande rouge et charcuterie par jour (viande rouge : boeuf, porc, agneau). 1 serv = 113.4g pour la viande et 42.525 g pour la charcuterie
