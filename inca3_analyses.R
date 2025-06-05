@@ -2,6 +2,7 @@
 library(tidyverse)
 library(openxlsx)
 library(survey)
+library(Hmisc)
 options("survey.lonely.psu" = "adjust")
 source("fonctions/mar_mer.R")
 source("fonctions/NRF9.R")
@@ -522,3 +523,94 @@ app_nut_pnns=app_nut%>%
 write.xlsx(app_nut_pnns,
            file="out/xlsx/indic_alim_PNNS.xlsx")
 write.csv2(app_nut_pnns,"out/csv/indic_alim_PNNS.xlsx")
+
+
+#A-HEI 2010 --------------
+
+#score from 0 to 110 (to 100 sans les transfat)
+#veg : serv/d 0 to 5 (score 10). All veg (hors pdt) - 1 serv = 0.5 cup veg or 1 cup of green leafy veg = 236.59 g
+# fruits (only whole fruits without fruit juice) : serv/d 0 to 4 - 1 serv = one medium piece of fruit or 0.5 cup berries 236.59 g 
+#whole grains : g/d 0 to 75 g for women or to 90 g for men
+#sugar sweetened bev and fruit juice serv/d >=1 to 0. 1 serv = 8 oz = 8*28.35 g
+# nut & legumes & veg prot (serv/d) : 0 to 1 : nuts and veg prot (e.g. tofu). 1 serv = 28.35 g
+# red meat+processed meat (serv/d): >=1.5 to red : boeuf, porc, agneau, charcuterie. 1 serv = 4 oz for unprocess (4 * 28.35) or 1.5 oz for processed (1.5 * 28.35g)
+# trans fat (% energy) >=4 to <=0.5
+# EPA+DHA mg/d 0 to 250
+#PUFA % energy (Without EPA + DHA) <=2 to >=10
+# sodium : highest decile to lowest decile
+#alcohol serving/d men >= 3.5 vs 0.5-2. women : >=2.5 max 0.5-1.5. non drinkers : score  of 2.5
+#one drink = 4 oz wine (4*28.35), 12 oz of beer (12*28.35), 1.5 oz of liquor (1.5*28.35)
+
+#Calcul des déciles de l'apport en sodium
+#app_nut=read.csv2("out/csv/app_nut_indiv.csv")
+
+dat=app_nut%>%
+  filter(type=="app_hors_alcool")%>%
+  mutate(
+#pufa sans epa dha, en % energie
+pufa_nrj=(ag_18_3_a_lino+ag_18_2_lino+ag_20_4_ara/100)*9/aet*100,
+
+redmeat_serv=(sg_PNNS_viandeshorsvolaille+sg_PNNS_abats)/(4*28.35)+
+(sg_PNNS_jambon+sg_PNNS_nojambon)/(1.5*28.35),
+nut_serv=(sg_PNNS_legsecs+sg_PNNS_noixfruitsacoque+sg_PNNS_subvege)/28.35,
+bev_serv=(sg_PNNS_bsucrees+sg_PNNS_jusdefruits100_)/(8*28.35),
+fruit_serv=sg_PNNS_fruits/100, #GEMRCN
+veg_serv=sg_PNNS_legumes/150, #GEMRCN
+wgrains=(sg_PNNS_prodcerealcomplets+sg_PNNS_prodpancomplets)
+)%>%
+  select(NOIND,sodium,sex_PS,pond_indiv_adu_pop3,pond_indiv_enf_pop3,epa_dha,pufa_nrj,redmeat_serv,nut_serv,bev_serv,fruit_serv,veg_serv,wgrains)%>%
+  mutate(ech=ifelse(is.na(pond_indiv_enf_pop3),"adu","enf"),
+    pond_indiv=ifelse(is.na(pond_indiv_enf_pop3),pond_indiv_adu_pop3,pond_indiv_enf_pop3))
+  
+#alcohol_serv
+#Estimer la qte selon le type d'alcool
+#Vins
+vin=c(1525,1526,1527,1528,1529,1531,1535,1536,1543,1550,1553,1555,
+1556,1559,1561,1563,1569,1578,1579,1580,2289,2879,2880,2881,
+2883,2884,2885,2937,2938,2949,3102,3365,3367,3437,3439,3440,
+3583,3584,3585,3654,3655,4084,4085,4086,4087,4088,4090,4091,
+4092,4093,4094,4097,4282,4283,4284,4285,4288,4289,5147,5148,
+5150,5151,6000)
+
+#Biere
+biere=c(1571,1573,1574,1576,1577,1581,2502,2503,2504,2505,2506,
+2507,2508,2509,2510,2622,2623,2624,2625,2626,2627,2630,
+4290,4291,4292,4320,6002)
+
+#liqueur alcools fort
+liq=c(1544,1547,1562,1583,1584,1589,1590,1591,1592,1601,1602,
+1603,1604,1608,1609,1623,1624,1625,1628,1630,1645,1658,
+1951,1973,2177,3236,3364,3727,3841,4294,4295,4296,4298,
+4299,4300,4301,4304,4305,4308,4309,4311,4312,4315,4317,
+4318,4319,4321,6001,6003)
+
+alcohol_serv=
+conso_compo%>%filter(Niveau_4=="Alcool")%>%
+  select(NOIND,aliment_code_INCA3,qte_conso_pond,R24_nombre)%>%
+  mutate(alcohol_serv=ifelse(aliment_code_INCA3%in%vin,qte_conso_pond/(4*28.35),
+                ifelse(aliment_code_INCA3%in%biere,qte_conso_pond/(12*28.35),
+                       ifelse(aliment_code_INCA3%in%liq,qte_conso_pond/(1.5*28.35),NA))))%>%
+  group_by(NOIND,R24_nombre)%>%
+  summarise(alcohol_serv=sum(alcohol_serv))%>%
+  #daily alcohol serv
+  mutate(alcohol_serv=alcohol_serv/R24_nombre)%>%ungroup()%>%select(-R24_nombre)
+
+dat=dat%>%left_join(alcohol_serv,by="NOIND")%>%
+  #0 pr les non conso d'alcohol
+  mutate(alcohol_serv=ifelse(is.na(alcohol_serv),0,alcohol_serv))
+
+#Decile sodium :
+dec_sodium = dat %>%
+  group_by(sex_PS,ech)%>%
+  summarise(
+    P10_sodium=Hmisc::wtd.quantile(sodium, weights=pond_indiv,probs = 0.1),
+    P90_sodium=Hmisc::wtd.quantile(sodium, weights=pond_indiv,probs = 0.9))%>%
+  select(sex_PS, ech, P10_sodium,  P90_sodium)
+dat=dat%>%left_join(dec_sodium,by=c("ech","sex_PS"))
+
+aHEI2010_res=ahei2010(df=dat)
+
+#EXPORT
+write.xlsx(aHEI2010_res,
+           file="out/xlsx/indic_alim_aHEI2010.xlsx")
+write.csv2(aHEI2010_res,"out/csv/indic_alim_aHEI2010.xlsx")
