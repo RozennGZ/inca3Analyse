@@ -42,9 +42,9 @@ nrf9_3d=function(df,
       ratio_n_sodium=((sodium/aet*2000)/mrv_min_NA)-1)%>%
       
       #scores tronqués à 100
-      mutate_at(vars(starts_with("ratio_p")),~ifelse(.>1,1,.))%>%
+      mutate_at(vars(starts_with("ratio_p")),~ifelse(.>1,100,.*100))%>%
       #to consider excess only
-      mutate_at(vars(starts_with("ratio_n")),~ifelse(.<0,0,.))%>%
+      mutate_at(vars(starts_with("ratio_n")),~ifelse(.<0,0,.*100))%>%
     
       #subscores
     mutate(NR=ratio_p_prot+ratio_p_fibre+ratio_p_vitA+ratio_p_vitC+ratio_p_vitD+
@@ -52,7 +52,7 @@ nrf9_3d=function(df,
     LIM=ratio_n_add_sugar+ratio_n_sfa+ratio_n_sodium,
     
     #NRF9
-    NRF9=(NR-LIM)*100
+    NRF9=(NR-LIM)
     )
   
 # NRF9.3 = (NR − LIM) × 100 

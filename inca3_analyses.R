@@ -6,6 +6,7 @@ library(Hmisc)
 options("survey.lonely.psu" = "adjust")
 source("fonctions/mar_mer.R")
 source("fonctions/NRF9.R")
+source("fonctions/aHEI2010.R")
 
 #Indicateurs nutritionnels et alimentaires pour les individus d'INCA3 de plus de 1 an
 
@@ -209,8 +210,8 @@ data_de<-conso_compo%>%
   dplyr::group_by(NOIND,TYPE,R24_nombre)%>%
   dplyr::summarise(tot_NRJ = sum(NRJ_CONSO),tot_QTE= sum(qte_conso_pond))%>%
   tidyr::pivot_wider(names_from = TYPE,values_from = c("tot_QTE","tot_NRJ"))%>%
-  dplyr::mutate(MOY_NRJ_J = tot_NRJ_SOLIDE/R24_nombre, MOY_QTE_J = tot_QTE_SOLIDE/R24_nombre)%>%
-  dplyr::mutate(DE = (MOY_NRJ_J/MOY_QTE_J)*100)
+  dplyr::mutate(NRJ_SOLIDE_J = tot_NRJ_SOLIDE/R24_nombre, QTE_SOLIDE_J = tot_QTE_SOLIDE/R24_nombre)%>%
+  dplyr::mutate(DE = (NRJ_SOLIDE_J/QTE_SOLIDE_J)*100)
 
 #20 individus ont une DE nulle car aucune conso d'aliments solides (laits infantiles)
 #View(conso_compo%>%filter(NOIND%in%c(data_de%>%filter(is.na(DE))%>%pull(NOIND))))
@@ -233,7 +234,6 @@ reco_table=bind_rows(reco_enftok,reco_aduok%>%
   mutate(NUT_inca=ifelse(NUT_inca%in%c("ferlow","ferhigh"),"fer",NUT_inca))%>%
   #remove AS du sodium
   mutate(AS=ifelse(NUT_inca=="sodium",NA,AS))
-  
   )
 #note : calcium à 900mg pour tous les adultes)
 
@@ -321,13 +321,14 @@ app_nut%>%
 # moy_pandiet <- mean(PANDIET$PANDiet)
 
 #EXPORT
-write.xlsx(res_MAR_MER%>%left_join(data_de%>%select(NOIND,tot_QTE_SOLIDE,tot_NRJ_SOLIDE,DE))%>%
+write.xlsx(res_MAR_MER%>%left_join(data_de%>%select(NOIND,NRJ_SOLIDE_J,QTE_SOLIDE_J,DE))%>%
              left_join(NRF_INCA%>%select(NOIND,starts_with("ratio_"),NR,LIM,NRF9)),
                       file="out/xlsx/indic_nut.xlsx")
-write.csv2(res_MAR_MER%>%left_join(data_de%>%select(NOIND,tot_QTE_SOLIDE,tot_NRJ_SOLIDE,DE))%>%
+write.csv2(res_MAR_MER%>%left_join(data_de%>%select(NOIND,NRJ_SOLIDE_J,QTE_SOLIDE_J,DE))%>%
              left_join(NRF_INCA%>%select(NOIND,starts_with("ratio_"),NR,LIM,NRF9)),
            file="out/csv/indic_nut.csv")
 ########## Indicateurs alim ---------------------
+#app_nut=read.csv2("out/csv/app_nut_indiv.csv")
 
 #PNNS-GS ------------------
 
@@ -522,10 +523,11 @@ app_nut_pnns=app_nut%>%
 #EXPORT
 write.xlsx(app_nut_pnns,
            file="out/xlsx/indic_alim_PNNS.xlsx")
-write.csv2(app_nut_pnns,"out/csv/indic_alim_PNNS.xlsx")
+write.csv2(app_nut_pnns,"out/csv/indic_alim_PNNS.csv")
 
 
 #A-HEI 2010 --------------
+#ref : Chiuve et al. Alternative Dietary Indices Both Strongly Predict Risk of Chronic Disease (mais sans transfat)
 
 #score from 0 to 110 (to 100 sans les transfat)
 #veg : serv/d 0 to 5 (score 10). All veg (hors pdt) - 1 serv = 0.5 cup veg or 1 cup of green leafy veg = 236.59 g
@@ -613,4 +615,4 @@ aHEI2010_res=ahei2010(df=dat)
 #EXPORT
 write.xlsx(aHEI2010_res,
            file="out/xlsx/indic_alim_aHEI2010.xlsx")
-write.csv2(aHEI2010_res,"out/csv/indic_alim_aHEI2010.xlsx")
+write.csv2(aHEI2010_res,"out/csv/indic_alim_aHEI2010.csv")

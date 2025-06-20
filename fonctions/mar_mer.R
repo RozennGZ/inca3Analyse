@@ -54,9 +54,9 @@ MAR_MER=function(apport_nut_indiv=NULL,
                 filter(NUT_inca%in%c("sucres_libres_pctNRJ","ags_pctNRJ","sodium"))
               ,by=c("name"="NUT_inca","sex_PS","tage_PS"))%>%
     mutate(MER_sub=value/LSS*100)%>%
-    mutate(MER_sub=ifelse(MER_sub<100,0,MER_sub))%>%
+    mutate(MER_sub=ifelse(MER_sub<100,100,MER_sub))%>%
     group_by(NOIND)%>%
-    summarise(MER=mean(MER_sub),n_mer=n())
+    summarise(MER=mean(MER_sub)-100,n_mer=n())
   
   res=MAR%>%left_join(MER)
   
