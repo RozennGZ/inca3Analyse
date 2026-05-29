@@ -3,7 +3,7 @@
 #' "ag_18_3_a_lino_pctNRJ",
 #' "ag_18_2_lino_pctNRJ",
 #' "proteines_pctNRJ",
-#' "epa_dha","fibres_pctNRJ",
+#' "epa_dha","fibres_pctNRJ", #fibre pct nrj c'est pour la reco en fibre des enfants, qui est exprimée en g/kcal
 #' "fibres","calcium","vitamine_b1_pctNRJ","vitamine_b2","vitamine_b3_pctNRJ","vitamine_c",
 #' "vitamine_b9","iode","phosphore","potassium","selenium","vitamine_b12","vitamine_d","cuivre","fer",
 #' "magnesium","zinc","vitamine_a","vitamine_b6","vitamine_e","sucres_libres_pctNRJ","ags_pctNRJ","sodium"
