@@ -1,5 +1,9 @@
 ########## Load Packages ----------------------
-library(tidyverse)
+.libPaths(paste0(Sys.getenv("USERPROFILE"),"\\kDrive\\Common documents\\MS-Nutrition\\3. PROJETS\\R_packages\\4.5.2 15_04_2026"))
+
+library(dplyr)
+library(tidyr)
+library(purrr)
 library(openxlsx)
 library(survey)
 library(Hmisc)
@@ -12,8 +16,12 @@ source("fonctions/aHEI2010.R")
 
 ########## Data Importation -------------------
 #Importation de la dernière table générée par Florent
-conso_compo <- read.csv2("../../TABLES INCA3 PRIX AGB/conso_compo_prix_impact_recette_FEV_2025.csv", sep =  ",",dec=".",
-                          encoding="UTF-8")
+# conso_compo <- read.csv2("../../TABLES INCA3 PRIX AGB/conso_compo_prix_impact_recette_FEV_2025.csv", sep =  ",",dec=".",
+#                           encoding="UTF-8")
+
+conso_compo <- read.csv2("../../TABLES INCA3 PRIX AGB/conso_compo_prix_impact_recette_AVR_2025.csv", sep =  ",",dec=".",
+                         encoding="UTF-8")
+
 description_indiv <- read.csv2("../../TABLES INCA3 PRIX AGB/description-indiv.csv", 
                                sep = ";",dec=".")
 activite_phys <- read.csv2("../../TABLES INCA3 PRIX AGB/actphys-sedent.csv", 
@@ -104,8 +112,11 @@ reco=bind_rows(reco_aduok,reco_enftok)
 
 ########## Apports nutritionnels - coût - impacts environnementaux - Consommations variables PNNS individuels -------------------
 #Liste Variables
-list_var=colnames(conso_compo)[c(20:73,75,146:163,169:171,173:226,232:244,248:253,257,258,260,261,263,452)]
-list_var_pct=list_var[c(3,4,5,8,10,11,22:24,32,34,74,75,155)]
+
+list_var=colnames(conso_compo)[c(20:73,75,148:168,174:176,178:231,237:249,253:258,262:266,455)]
+
+#list_var=colnames(conso_compo)[c(20:73,75,146:163,169:171,173:226,232:244,248:253,257,258,260,261,263,452)]
+list_var_pct=list_var[c(3,4,5,8,10,11,22:24,32,34,77,78,158)]
 
 #Hors boissons alcoolisées ------
 
@@ -164,8 +175,8 @@ app_nut_alc=app_nut_alc%>%left_join(app_pct_alc)%>%
 app_nut=bind_rows(app_nut,app_nut_alc)
 
 #EXPORT
-openxlsx::write.xlsx(app_nut,file="out/xlsx/app_nut_indiv.xlsx")
-write.csv2(app_nut,file="out/csv/app_nut_indiv.csv")
+openxlsx::write.xlsx(app_nut,file="out/xlsx/app_nut_indiv_AVRIL2025.xlsx")
+write.csv2(app_nut,file="out/csv/app_nut_indiv_AVRIL2025.csv")
 
 ########## Apports en % de la recommandation ------------------
 #app_nut=read.csv2("out/csv/app_nut_indiv.csv")
